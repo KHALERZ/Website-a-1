@@ -1,69 +1,71 @@
-
 const express = require('express');
-const bodyParser = require('body-parser');
-const session = require('express-session');
 const path = require('path');
-
+const bodyParser = require('body-parser');
 const app = express();
 const PORT = 3000;
 
-// الحساب الثابت
 const USERS = {
   admin: {
     password: 'admin#20211024',
-    role: 'مؤسس'
+    role: 'مؤسس',
+    name: 'Test Name',
+    email: 'test@example.com',
+    phone: '0000000000'
   }
 };
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-  secret: 'yourSecretKey',
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(express.static('public'));
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-// صفحة تسجيل الدخول
 app.get('/', (req, res) => {
-  if (req.session.user) {
-    res.redirect('/dashboard');
-  } else {
-    res.sendFile(__dirname + '/public/login.html');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// التحقق من تسجيل الدخول
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const user = USERS[username];
 
   if (user && user.password === password) {
-    req.session.user = {
-      username,
-      role: user.role
-    };
-    res.redirect('/dashboard');
+    res.send(`
+      <html lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <title>لوحة التحكم</title>
+        <style>
+          body { font-family: Arial; text-align: center; margin-top: 80px; background: #f4f4f4; }
+          .container {
+            background: white; padding: 20px; border-radius: 10px;
+            width: 90%; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          }
+          .info { text-align: right; direction: rtl; margin-top: 20px; }
+          a {
+            text-decoration: none; color: white; background: red;
+            padding: 10px 20px; display: inline-block; border-radius: 5px;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>مرحبًا بك في لوحة إدارة الفريق!</h1>
+          <p>تم تسجيل الدخول بصلاحية: <strong>${user.role}</strong></p>
+          <div class="info">
+            <p><strong>اسم المستخدم:</strong> ${username}</p>
+            <p><strong>الاسم الكامل:</strong> ${user.name}</p>
+            <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
+            <p><strong>رقم الجوال:</strong> ${user.phone}</p>
+            <p><strong>الرتبة:</strong> ${user.role}</p>
+          </div>
+          <a href="/">تسجيل الخروج</a>
+        </div>
+      </body>
+      </html>
+    `);
   } else {
-    res.send('بيانات غير صحيحة <a href="/">رجوع</a>');
+    res.send('<p>بيانات الدخول خاطئة.</p><a href="/">حاول مرة أخرى</a>');
   }
-});
-
-// لوحة التحكم
-app.get('/dashboard', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/');
-  }
-  res.sendFile(__dirname + '/public/dashboard.html');
-});
-
-// تسجيل الخروج
-app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/');
-  });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
