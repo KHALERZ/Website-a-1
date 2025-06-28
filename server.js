@@ -8,9 +8,9 @@ const USERS = {
   admin: {
     password: 'admin#20211024',
     role: 'مؤسس',
-    name: 'Test Name',
-    email: 'test@example.com',
-    phone: '0000000000'
+    name: 'خالد',
+    email: 'nex.a8tra7at@gmail.com',
+    phone: '-'
   }
 };
 
